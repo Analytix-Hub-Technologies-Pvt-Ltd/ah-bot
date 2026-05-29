@@ -75,6 +75,19 @@ async function generateWebsiteBrain(corpus, url = "") {
   const provider = settings.synthesisProvider || 'groq';
   const apiKey = settings.groqKey || process.env.GROQ_API_KEY;
 
+  // Dynamically strip and generalize the reference template to guarantee 100% isolation and prevent brand/location leaks
+  const genericTemplate = db.DEFAULT_SYSTEM_PROMPT
+    .replace(/AnalytixHub/gi, '[BUSINESS_NAME]')
+    .replace(/analytixhub\.org/gi, '[BUSINESS_URL]')
+    .replace(/AH Bot/g, '[BOT_NAME]')
+    .replace(/contactus@analytixhub\.org/gi, '[CONTACT_EMAIL]')
+    .replace(/\+91\s*7397577392/g, '[CONTACT_PHONE]')
+    .replace(/1st floor, Primus Building, Door No\. SP – 7A, Guindy Industrial Estate, SIDCO Industrial Estate, Guindy, Chennai, Tamil Nadu - 600032, India\./gi, '[PHYSICAL_ADDRESS_IF_EXIST_OR_OPERATE_ONLINE]')
+    .replace(/https:\/\/www\.google\.com\/maps\/search\/\?api=1&query=[^\s\)]+/gi, '[GOOGLE_MAPS_SEARCH_LINK]')
+    .replace(/Chennai/gi, '[LOCATION_CITY]')
+    .replace(/Guindy/gi, '[LOCATION_NEIGHBORHOOD]')
+    .replace(/Tata Communications|Indian Oil|SAB|Wondersoft|Mindsprint/g, '[CONFIDENTIAL_CLIENTS_TO_OMIT]');
+
   // 1. Compile Meta Prompt with strict structural layout and extraction requirements
   const metaPrompt = `You are a world-class AI developer and expert system prompt engineer. Your job is to analyze the crawled content of a website and synthesize a state-of-the-art configuration for a custom Helpdesk AI Chatbot.
 
@@ -87,7 +100,7 @@ ${corpus}
 ### 📋 PROMPT STRUCTURAL REFERENCE TEMPLATE:
 Your generated systemPrompt MUST match the exact formatting style, bulleted structure, comprehensive detail level, tone, and length of the reference template below. Avoid producing short summaries or generic paragraphs; write a complete, rich, production-grade assistant instruction set (at least 600-1000 words) matching this layout:
 
-${db.DEFAULT_SYSTEM_PROMPT}
+${genericTemplate}
 ---
 
 ### 🚨 CRITICAL CUSTOMIZATION RULES:
