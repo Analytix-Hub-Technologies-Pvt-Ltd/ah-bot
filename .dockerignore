@@ -1,0 +1,12 @@
+node_modules
+.env
+data/db.json
+.git
+.vscode
+test_booking.js
+test_sendmail.js
+*.log
+walkthrough.md
+deployment_guide.md
+task.md
+implementation_plan.md
